@@ -1,0 +1,49 @@
+{
+  "results": [
+    {
+      "extensions": [
+        {
+          "publisher": {
+            "publisherId": "998b010b-e2af-44a5-a6cd-0b5fd3b9b6f8",
+            "publisherName": "ms-python",
+            "displayName": "Microsoft",
+            "flags": "verified",
+            "domain": "https://microsoft.com",
+            "isDomainVerified": true
+          },
+          "extensionId": "f1f59ae4-9318-4f3c-a9b5-81b2eaa5f8a5",
+          "extensionName": "python",
+          "displayName": "Python",
+          "flags": "validated, public",
+          "lastUpdated": "2022-04-21T10:08:14.973Z",
+          "publishedDate": "2016-01-19T15:03:11.337Z",
+          "releaseDate": "2016-01-19T15:03:11.337Z",
+          "shortDescription": "IntelliSense (Pylance), Linting, Debugging (multi-threaded, remote), Jupyter Notebooks, code formatting, refactoring, unit tests, and more.",
+          "versions": [
+            {
+              "version": "2022.5.11111003",
+              "flags": "validated",
+              "lastUpdated": "2022-04-21T10:08:14.973Z",
+              "files": [
+                {
+                  "assetType": "Microsoft.VisualStudio.Services.VSIXPackage",
+                  "source": "https://ms-python.gallerycdn.vsassets.io/extensions/ms-python/python/2022.5.11111003/1650535546822/Microsoft.VisualStudio.Services.VSIXPackage"
+                }
+              ],
+              "assetUri": "https://ms-python.gallerycdn.vsassets.io/extensions/ms-python/python/2022.5.11111003/1650535546822",
+              "fallbackAssetUri": "https://ms-python.gallery.vsassets.io/_apis/public/gallery/publisher/ms-python/extension/python/2022.5.11111003/assetbyname"
+            }
+          ],
+          "deploymentType": 0
+        }
+      ],
+      "pagingToken": null,
+      "resultMetadata": [
+        {
+          "metadataType": "ResultCount",
+          "metadataItems": [{ "name": "TotalCount", "count": 1 }]
+        }
+      ]
+    }
+  ]
+}
