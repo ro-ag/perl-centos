@@ -6,6 +6,8 @@ package res
 //
 //   "Set quicktype target language"
 
+//src/vs/platform/extensionManagement/node/extensionGalleryService.ts
+
 type JSON struct {
 	Results []Result `json:"results"`
 }
@@ -17,17 +19,23 @@ type Result struct {
 }
 
 type Extension struct {
-	Publisher        Publisher `json:"publisher"`
-	ExtensionID      string    `json:"extensionId"`
-	ExtensionName    string    `json:"extensionName"`
-	DisplayName      string    `json:"displayName"`
-	Flags            string    `json:"flags"`
-	LastUpdated      string    `json:"lastUpdated"`
-	PublishedDate    string    `json:"publishedDate"`
-	ReleaseDate      string    `json:"releaseDate"`
-	ShortDescription string    `json:"shortDescription"`
-	Versions         []Version `json:"versions"`
-	DeploymentType   int64     `json:"deploymentType"`
+	Publisher           Publisher            `json:"publisher"`
+	ExtensionID         string               `json:"extensionId"`
+	ExtensionName       string               `json:"extensionName"`
+	DisplayName         string               `json:"displayName"`
+	Flags               string               `json:"flags"`
+	LastUpdated         string               `json:"lastUpdated"`
+	PublishedDate       string               `json:"publishedDate"`
+	ReleaseDate         string               `json:"releaseDate"`
+	ShortDescription    string               `json:"shortDescription"`
+	Versions            []Version            `json:"versions"`
+	InstallationTargets []InstallationTarget `json:"installationTargets"`
+	DeploymentType      int64                `json:"deploymentType"`
+}
+
+type InstallationTarget struct {
+	Target        string `json:"target"`
+	TargetVersion string `json:"targetVersion"`
 }
 
 type Publisher struct {
@@ -40,12 +48,18 @@ type Publisher struct {
 }
 
 type Version struct {
-	Version          string `json:"version"`
-	Flags            string `json:"flags"`
-	LastUpdated      string `json:"lastUpdated"`
-	Files            []File `json:"files"`
-	AssetURI         string `json:"assetUri"`
-	FallbackAssetURI string `json:"fallbackAssetUri"`
+	Version          string     `json:"version"`
+	Flags            string     `json:"flags"`
+	LastUpdated      string     `json:"lastUpdated"`
+	Files            []File     `json:"files"`
+	Properties       []Property `json:"properties"`
+	AssetURI         string     `json:"assetUri"`
+	FallbackAssetURI string     `json:"fallbackAssetUri"`
+}
+
+type Property struct {
+	Key   Key    `json:"key"`
+	Value string `json:"value"`
 }
 
 type File struct {
@@ -63,26 +77,73 @@ type MetadataItem struct {
 	Count int64  `json:"count"`
 }
 
+type Flags string
+
+const (
+	Validated Flags = "validated"
+)
+
+type Key string
+
+const (
+	MicrosoftVisualStudioCodeEngine                     Key = "Microsoft.VisualStudio.Code.Engine"
+	MicrosoftVisualStudioCodeExtensionDependencies      Key = "Microsoft.VisualStudio.Code.ExtensionDependencies"
+	MicrosoftVisualStudioCodeExtensionKind              Key = "Microsoft.VisualStudio.Code.ExtensionKind"
+	MicrosoftVisualStudioCodeExtensionPack              Key = "Microsoft.VisualStudio.Code.ExtensionPack"
+	MicrosoftVisualStudioCodeLocalizedLanguages         Key = "Microsoft.VisualStudio.Code.LocalizedLanguages"
+	MicrosoftVisualStudioCodePreRelease                 Key = "Microsoft.VisualStudio.Code.PreRelease"
+	MicrosoftVisualStudioServicesBrandingColor          Key = "Microsoft.VisualStudio.Services.Branding.Color"
+	MicrosoftVisualStudioServicesBrandingTheme          Key = "Microsoft.VisualStudio.Services.Branding.Theme"
+	MicrosoftVisualStudioServicesCustomerQnALink        Key = "Microsoft.VisualStudio.Services.CustomerQnALink"
+	MicrosoftVisualStudioServicesGitHubFlavoredMarkdown Key = "Microsoft.VisualStudio.Services.GitHubFlavoredMarkdown"
+	MicrosoftVisualStudioServicesLinksGetstarted        Key = "Microsoft.VisualStudio.Services.Links.Getstarted"
+	MicrosoftVisualStudioServicesLinksGitHub            Key = "Microsoft.VisualStudio.Services.Links.GitHub"
+	MicrosoftVisualStudioServicesLinksLearn             Key = "Microsoft.VisualStudio.Services.Links.Learn"
+	MicrosoftVisualStudioServicesLinksSource            Key = "Microsoft.VisualStudio.Services.Links.Source"
+	MicrosoftVisualStudioServicesLinksSupport           Key = "Microsoft.VisualStudio.Services.Links.Support"
+)
+
 func AssetTypeVSIXPackage() string {
 	return "Microsoft.VisualStudio.Services.VSIXPackage"
 }
 
 func (j JSON) VSIXPackageURL() string {
-	last := j.Results[0].Extensions[0].Versions[0]
-	for i := range last.Files {
-		if last.Files[i].AssetType == AssetTypeVSIXPackage() {
-			return last.Files[i].Source
+	for _, v := range j.First().Files {
+		if v.AssetType == AssetTypeVSIXPackage() {
+			return v.Source
 		}
 	}
 	return ""
 }
 
 func (j JSON) IsExtensionURL() bool {
-	last := j.Results[0].Extensions[0].Versions[0]
-	for i := range last.Files {
-		if last.Files[i].AssetType == AssetTypeVSIXPackage() {
+	for _, v := range j.First().Files {
+		if v.AssetType == AssetTypeVSIXPackage() {
 			return true
 		}
 	}
 	return false
+}
+
+func (j JSON) First() *Version {
+	for _, v := range j.Results[0].Extensions[0].Versions {
+		isPreRelease := false
+		for _, p := range v.Properties {
+			if p.Key == MicrosoftVisualStudioCodePreRelease && p.Value == "true" {
+				isPreRelease = true
+				break
+			}
+		}
+		if isPreRelease {
+			continue
+		} else {
+			//log.Println("Item Number", i)
+			return &v
+		}
+	}
+	return nil
+}
+
+func (j JSON) FileName() string {
+	return j.Results[0].Extensions[0].Publisher.PublisherName + ".vsix"
 }

@@ -6,17 +6,17 @@ import (
 	"log"
 )
 
-func NewQuery(extensionName string) Query {
+func NewQuery(extensionName string, flags Flags) Query {
 	data := Query{
 		Filters: []Filter{
 			{
 				Criteria: []Criterion{
 					{
-						FilterType: 8,
+						FilterType: Target,
 						Value:      "Microsoft.VisualStudio.Code",
 					},
 					{
-						FilterType: 7,
+						FilterType: ExtensionName,
 						Value:      extensionName,
 					},
 				},
@@ -26,8 +26,8 @@ func NewQuery(extensionName string) Query {
 				SortOrder:  0,
 			},
 		},
-		AssetTypes: []string{"Microsoft.VisualStudio.Services.VSIXPackage"},
-		Flags:      514,
+		AssetTypes: []AssetTypes{VSIX},
+		Flags:      flags,
 	}
 	return data
 }
