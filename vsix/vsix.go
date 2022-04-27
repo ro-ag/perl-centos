@@ -1,11 +1,14 @@
 package main
 
 import (
+	"archive/zip"
 	"encoding/json"
-	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"vsix/req"
 	"vsix/res"
 )
@@ -17,8 +20,6 @@ func main() {
 	// nice too to test
 	// https://reqbin.com
 	data := req.NewQuery("golang.Go", req.IncludeVersions|req.ExcludeNonValidated|req.IncludeFiles|req.IncludeVersionProperties)
-
-	fmt.Println("Hello")
 	response, err := http.Post(MarketPlaceAPI, "application/json", data.Reader())
 	if err != nil {
 		log.Fatal(err)
@@ -50,5 +51,26 @@ func main() {
 		log.Fatal("STATUS: ", response.Status)
 	}
 
-	DownloadFile(given.VSIXPackageURL(), "./"+given.FileName())
+	DownloadFile(given.VSIXPackageURL(), "./"+given.FileNameVSIX())
+	DownloadFile(given.VSIXPackageURL(), "./"+given.FileNameZIP())
+}
+
+func Unpack(file string) error {
+	archive, err := zip.OpenReader(file)
+	if err != nil {
+		return err
+	}
+	defer archive.Close()
+
+	dir, err := ioutil.TempDir("./tmp/", SansExtension(file))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+	return nil
+}
+
+func SansExtension(fileName string) string {
+	base := filepath.Base(fileName)
+	return base[:len(base)-len(filepath.Ext(base))]
 }
